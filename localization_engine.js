@@ -445,10 +445,203 @@ function generateJs() {
         } catch (e) {}
     }
 
+    // ================================================================
+    // 反重力专属趣味 Spinner 动词动态轮转（配生动 Emoji + 悬浮向上翻转微动效）
+    // ================================================================
+    const activeRoots = new Set();
+
+    function ensureSpinnerStyles(root) {
+        try {
+            if (typeof document === 'undefined') return;
+            const doc = root ? (root.ownerDocument || root) : document;
+            if (!doc) return;
+            const target = (root && root.nodeType === Node.DOCUMENT_FRAGMENT_NODE)
+                ? root
+                : (doc.head || doc.documentElement);
+            if (!target) return;
+            if (target.querySelector && target.querySelector('#antigravity-fun-spinner-style')) return;
+            const style = doc.createElement('style');
+            style.id = 'antigravity-fun-spinner-style';
+            style.textContent = [
+                '@keyframes antigravitySpinnerSlideUp {',
+                '  0% { opacity: 0; transform: translateY(4px) scale(0.97); }',
+                '  100% { opacity: 1; transform: translateY(0) scale(1); }',
+                '}',
+                '.antigravity-fun-spinner-flip {',
+                '  display: inline-flex !important;',
+                '  align-items: center !important;',
+                '  animation: antigravitySpinnerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;',
+                '}'
+            ].join('\\n');
+            target.appendChild(style);
+        } catch (e) {}
+    }
+
+    function animateTextFlip(el, nextText) {
+        if (!el || el.textContent === nextText) return;
+        const root = el.getRootNode ? el.getRootNode() : null;
+        ensureSpinnerStyles(root);
+        ensureSpinnerStyles(document);
+        el.style.transition = 'opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)';
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-3px)';
+        setTimeout(() => {
+            el.textContent = nextText;
+            el.classList.add('antigravity-fun-spinner-flip');
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+            setTimeout(() => {
+                if (el.classList) el.classList.remove('antigravity-fun-spinner-flip');
+            }, 320);
+        }, 150);
+    }
+
+    const FUN_VERBS = USE_TW ? [
+        // --- 反重力科幻特調 ---
+        "🪐 引力彈弓加速中", "🛸 曲率引擎折疊中", "🌌 調校超弦張力中", "🚀 努力擺脫地心引力中",
+        "✨ 跨維度借算力中", "⚡ 量子糾纏通信中", "🌀 奇點引力坍縮中", "🛰️ 躍遷軌道校準中",
+        "📡 深空信標連接中", "🔭 巡天全域掃描中", "💫 零重力懸浮漂移中", "🧬 拓撲量子態編織中",
+        // --- 經典生動趣味動詞 (配生動 Emoji) ---
+        "✨ 搞定中", "🚀 行動中", "💰 變現中", "📐 架構中", "🥐 烘焙中", "💡 發光中", "🎸 即興中", "😵 犯暈中", "🍃 飄盪中", "🍲 焯水中",
+        "🐂 吹牛中", "🪩 蹦迪中", "🏃 瞎忙活中", "👉 戳一戳", "🔌 引導啟動中", "🍵 沏茶中", "🥟 蒸包子中", "⛏️ 掘進中", "🧮 計算中", "🍧 膩歪中",
+        "🍮 焦糖化中", "🌊 級聯中", "🏹 彈射中", "🧘 冥想中", "🔮 通靈中", "📡 感應中", "💃 編舞中", "🥣 翻攪中", "🤖 克勞丁中", "🧊 凝聚中",
+        "🧐 琢磨中", "🧩 拼湊中", "🎼 譜曲中", "⚙️ 運算中", "🧪 調配中", "💭 盤算中", "🤔 沉思中", "🍳 烹飪中", "🔨 鍛造中", "🎨 創造中",
+        "📊 嚼數據中", "💎 結晶中", "🌱 培育中", "🔍 破譯中", "⚖️ 推敲中", "🎯 定奪中", "⏳ 磨磨唧唧中", "🌀 七葷八素中", "👷 幹活中", "🖍️ 塗鴉中",
+        "🍯 淋醬中", "🌊 退潮中", "📜 施行中", "📖 闡釋中", "💅 潤色中", "🪄 施法中", "🧠 構想中", "💨 蒸發中", "🍺 發酵中", "🦥 磨洋工中",
+        "🎩 忽悠中", "🔥 火焰烹飪中", "🗣️ 嘰裡呱啦中", "💫 流轉中", "😵‍💫 懵圈中", "🦋 撲稜中", "⚔️ 淬煉中", "🏺 塑形中", "🎉 撒歡中", "❄️ 挂霜中",
+        "🚶 到處溜達中", "🏎️ 飛馳中", "🍱 擺盤中", "🪄 生成中", "✌️ 比劃中", "🌿 發芽中", "🦀 Git化中", "🎶 律動中", "🌪️ 狂風中", "🍵 調和中",
+        "🔑 哈希中", "🐣 破殼中", "🐈 趕貓中", "📯 按喇叭中", "📢 吵吵嚷嚷中", "🚀 超空間跳躍中", "💭 構思中", "🌌 想像中", "🎷 即興發揮中", "🥚 孵化中",
+        "💡 推斷中", "🫖 浸泡中", "⚡ 電離中", "🕺 跳吉特巴中", "🥒 切絲中", "🥖 揉麵中", "🍞 發麵中", "🛸 懸浮中", "🐮 反芻思考中", "✨ 顯化中",
+        "🥒 醃製中", "🐍 蜿蜒中", "🦋 蛻變中", "🌫️ 起霧中", "🕺 太空步中", "🚶 溜溜達達中", "🧐 沉吟中", "📣 召集中", "💭 遐想中", "💨 霧化中",
+        "🪹 築巢中", "📰 看報紙中", "🤔 瞎琢磨中", "⚛️ 成核中", "🪐 公轉中", "🎼 編排中", "💧 滲透中", "🚶 閒庭信步中", "☕ 滲濾中", "📚 翻閱中",
+        "🗣️ 思辨中", "🌻 光合作用中", "🐝 授粉中", "🧐 考究中", "🎙️ 高談闊論中", "🐆 猛撲中", "🧪 沉澱中", "🎩 變魔術中", "⚙️ 處理中", "📝 校對中",
+        "📡 傳播中", "🐌 磨蹭中", "🧩 解謎中", "⚡ 量子化中", "🦚 花裡胡哨中", "✨ 閃亮登場中", "🚩 重整旗鼓中", "🌐 連網中", "🕊️ 歸巢中", "🐄 反芻中",
+        "🥘 翻炒中", "🦘 蹦躂中", "🧱 搬磚中", "🐿️ 竄來竄去中", "🧂 調味中", "🧨 搞事情中", "🕯️ 搖曳中", "🍲 慢燉中", "💨 溜之大吉中", "✏️ 速寫中",
+        "🐾 遊走中", "🧼 揉搓中", "💃 跳搖擺舞中", "🔦 探洞中", "🌀 旋轉中", "🌱 萌芽中", "🥘 燜煮中", "💨 昇華中", "🌪️ 旋渦中", "🦅 俯衝中",
+        "🤝 共生中", "🧬 合成中", "🗡️ 淬火中", "🤔 思考中", "⚡ 雷鳴中", "🛠️ 鼓搗中", "🤡 胡鬧中", "🙃 顛三倒四中", "🎭 變形中", "🔄 轉化中",
+        "🥨 扭轉中", "🌊 起伏中", "📂 展開中", "🧩 拆解中", "🧘 沉浸中", "💪 抖擻中", "🎸 搖擺中", "🧭 漫遊中", "🌌 扭曲時空中", "❓ 那個啥來著中",
+        "🐝 嗡嗡轉中", "🥛 攪打中", "🦥 磨嘰中", "💼 搞事業中", "🐎 牧馬中", "🍋 切檸檬皮中", "🐍 蛇行走位中"
+    ] : [
+        // --- 反重力科幻特调 ---
+        "🪐 引力弹弓加速中", "🛸 曲率引擎折叠中", "🌌 调校超弦张力中", "🚀 努力摆脱地心引力中",
+        "✨ 跨维度借算力中", "⚡ 量子纠缠通信中", "🌀 奇点引力坍缩中", "🛰️ 跃迁轨道校准中",
+        "📡 深空信标连接中", "🔭 巡天全域扫描中", "💫 零重力悬浮漂移中", "🧬 拓扑量子态编织中",
+        // --- 经典生动趣味动词 (配生动 Emoji) ---
+        "✨ 搞定中", "🚀 行动中", "💰 变现中", "📐 架构中", "🥐 烘焙中", "💡 发光中", "🎸 即兴中", "😵 犯晕中", "🍃 飘荡中", "🍲 焯水中",
+        "🐂 吹牛中", "🪩 蹦迪中", "🏃 瞎忙活中", "👉 戳一戳", "🔌 引导启动中", "🍵 沏茶中", "🥟 蒸包子中", "⛏️ 掘进中", "🧮 计算中", "🍧 腻歪中",
+        "🍮 焦糖化中", "🌊 级联中", "🏹 弹射中", "🧘 冥想中", "🔮 通灵中", "📡 感应中", "💃 编舞中", "🥣 翻搅中", "🤖 克劳丁中", "🧊 凝聚中",
+        "🧐 琢磨中", "🧩 拼凑中", "🎼 谱曲中", "⚙️ 运算中", "🧪 调配中", "💭 盘算中", "🤔 沉思中", "🍳 烹饪中", "🔨 锻造中", "🎨 创造中",
+        "📊 嚼数据中", "💎 结晶中", "🌱 培育中", "🔍 破译中", "⚖️ 推敲中", "🎯 定夺中", "⏳ 磨磨唧唧中", "🌀 七荤八素中", "👷 干活中", "🖍️ 涂鸦中",
+        "🍯 淋酱中", "🌊 退潮中", "📜 施行中", "📖 阐释中", "💅 润色中", "🪄 施法中", "🧠 构想中", "💨 蒸发中", "🍺 发酵中", "🦥 磨洋工中",
+        "🎩 忽悠中", "🔥 火焰烹饪中", "🗣️ 叽里呱啦中", "💫 流转中", "😵‍💫 懵圈中", "🦋 扑棱中", "⚔️ 淬炼中", "🏺 塑形中", "🎉 撒欢中", "❄️ 挂霜中",
+        "🚶 到处溜达中", "🏎️ 飞驰中", "🍱 摆盘中", "🪄 生成中", "✌️ 比划中", "🌿 发芽中", "🦀 Git化中", "🎶 律动中", "🌪️ 狂风中", "🍵 调和中",
+        "🔑 哈希中", "🐣 破壳中", "🐈 赶猫中", "📯 按喇叭中", "📢 吵吵嚷嚷中", "🚀 超空间跳跃中", "💭 构思中", "🌌 想象中", "🎷 即兴发挥中", "🥚 孵化中",
+        "💡 推断中", "🫖 浸泡中", "⚡ 电离中", "🕺 跳吉特巴中", "🥒 切丝中", "🥖 揉面中", "🍞 发面中", "🛸 悬浮中", "🐮 反刍思考中", "✨ 显化中",
+        "🥒 腌制中", "🐍 蜿蜒中", "🦋 蜕变中", "🌫️ 起雾中", "🕺 太空步中", "🚶 溜溜达达中", "🧐 沉吟中", "📣 召集中", "💭 遐想中", "💨 雾化中",
+        "🪹 筑巢中", "📰 看报纸中", "🤔 瞎琢磨中", "⚛️ 成核中", "🪐 公转中", "🎼 编排中", "💧 渗透中", "🚶 闲庭信步中", "☕ 渗滤中", "📚 翻阅中",
+        "🗣️ 思辨中", "🌻 光合作用中", "🐝 授粉中", "🧐 考究中", "🎙️ 高谈阔论中", "🐆 猛扑中", "🧪 沉淀中", "🎩 变魔术中", "⚙️ 处理中", "📝 校对中",
+        "📡 传播中", "🐌 磨蹭中", "🧩 解谜中", "⚡ 量子化中", "🦚 花里胡哨中", "✨ 闪亮登场中", "🚩 重整旗鼓中", "🌐 联网中", "🕊️ 归巢中", "🐄 反刍中",
+        "🥘 翻炒中", "🦘 蹦跶中", "🧱 搬砖中", "🐿️ 窜来窜去中", "🧂 调味中", "🧨 搞事情中", "🕯️ 摇曳中", "🍲 慢炖中", "💨 溜之大吉中", "✏️ 速写中",
+        "🐾 游走中", "🧼 揉搓中", "💃 跳摇摆舞中", "🔦 探洞中", "🌀 旋转中", "🌱 萌芽中", "🥘 焖煮中", "💨 升华中", "🌪️ 旋涡中", "🦅 俯冲中",
+        "🤝 共生中", "🧬 合成中", "🗡️ 淬火中", "🤔 思考中", "⚡ 雷鸣中", "🛠️ 鼓捣中", "🤡 胡闹中", "🙃 颠三倒四中", "🎭 变形中", "🔄 转化中",
+        "🥨 扭转中", "🌊 起伏中", "📂 展开中", "🧩 拆解中", "🧘 沉浸中", "💪 抖擞中", "🎸 摇摆中", "🧭 漫游中", "🌌 扭曲时空中", "❓ 那个啥来着中",
+        "🐝 嗡嗡转中", "🥛 搅打中", "🦥 磨叽中", "💼 搞事业中", "🐎 牧马中", "🍋 切柠檬皮中", "🐍 蛇行走位中"
+    ];
+
+    const verbSet = new Set(FUN_VERBS);
+    for (const v of FUN_VERBS) {
+        const plain = v.replace(/^[^\w\u4e00-\u9fa5]+\s*/, '');
+        if (plain) verbSet.add(plain);
+    }
+    const BASE_THINKING = [
+        'Thinking', 'Thinking...', '思考中', '思考中...', '思考',
+        'Planning', 'Planning...', '规划中', '规划中...', '規劃中', '規劃中...',
+        'Reasoning', 'Reasoning...', '推理中', '推理中...',
+        'Working', 'Working...', '工作中', '工作中...',
+        'Generating', 'Generating...', '生成中', '生成中...'
+    ];
+    for (const b of BASE_THINKING) verbSet.add(b);
+
+    function isThinkingElement(el) {
+        if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
+        if (isCodeOrEditor(el)) return false;
+        if (el.childElementCount > 0) return false;
+        const text = (el.textContent || '').trim();
+        if (!text || text.length > 35) return false;
+        return verbSet.has(text);
+    }
+
+    function checkAndTriggerSpinner(node) {
+        try {
+            if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+            if (isThinkingElement(node)) {
+                const cur = (node.textContent || '').trim();
+                if (cur === 'Thinking' || cur === 'Thinking...' || cur === '思考中' || cur === '思考中...') {
+                    const next = FUN_VERBS[Math.floor(Math.random() * FUN_VERBS.length)];
+                    animateTextFlip(node, next);
+                }
+                return;
+            }
+            if (node.querySelectorAll) {
+                const subs = node.querySelectorAll(
+                    '[class*="thinking"], [class*="status"], [class*="spinner"], [class*="loading"], ' +
+                    '[data-loading], .ui-collapsible-action, [clipping="fade"], ' +
+                    'button span, div > span, span, p'
+                );
+                for (let i = 0; i < subs.length; i++) {
+                    const el = subs[i];
+                    if (isThinkingElement(el)) {
+                        const cur = (el.textContent || '').trim();
+                        if (cur === 'Thinking' || cur === 'Thinking...' || cur === '思考中' || cur === '思考中...') {
+                            const next = FUN_VERBS[Math.floor(Math.random() * FUN_VERBS.length)];
+                            animateTextFlip(el, next);
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    function initFunSpinnerEngine() {
+        ensureSpinnerStyles(document);
+        setInterval(() => {
+            try {
+                const targets = [];
+                const roots = [document, ...activeRoots];
+                for (const root of roots) {
+                    if (!root) continue;
+                    const candidates = root.querySelectorAll ? root.querySelectorAll(
+                        '[class*="thinking"], [class*="status"], [class*="spinner"], [class*="loading"], ' +
+                        '[data-loading], .ui-collapsible-action, [clipping="fade"], ' +
+                        'button span, div > span, span, p'
+                    ) : [];
+                    for (let i = 0; i < candidates.length; i++) {
+                        const el = candidates[i];
+                        if (isThinkingElement(el)) {
+                            targets.push(el);
+                        }
+                    }
+                }
+                for (const el of targets) {
+                    const currentText = (el.textContent || '').trim();
+                    let next = FUN_VERBS[Math.floor(Math.random() * FUN_VERBS.length)];
+                    if (next === currentText) {
+                        next = FUN_VERBS[(Math.floor(Math.random() * (FUN_VERBS.length - 1)) + 1) % FUN_VERBS.length];
+                    }
+                    animateTextFlip(el, next);
+                }
+            } catch (e) {}
+        }, 2500);
+    }
+
     const observer = new MutationObserver(mutations => {
         for (const m of mutations) {
             if (m.type === 'childList') {
-                for (const n of m.addedNodes) translateNode(n);
+                for (const n of m.addedNodes) {
+                    translateNode(n);
+                    checkAndTriggerSpinner(n);
+                }
             } else if (m.type === 'characterData') {
                 translateNode(m.target);
             }
@@ -457,12 +650,23 @@ function generateJs() {
 
     const obsOpts = { childList: true, subtree: true, characterData: true };
 
+    const registerRoot = (sr) => {
+        if (!sr || activeRoots.has(sr)) return;
+        activeRoots.add(sr);
+        try {
+            observer.observe(sr, obsOpts);
+            ensureSpinnerStyles(sr);
+        } catch (e) {}
+    };
+
     const startEngine = () => {
         const target = document.body || document.documentElement;
         if (target) {
             try {
+                registerRoot(document);
                 observer.observe(target, obsOpts);
                 translateNode(target);
+                checkAndTriggerSpinner(target);
             } catch (e) {}
         }
     };
@@ -470,11 +674,12 @@ function generateJs() {
     const origAttachShadow = Element.prototype.attachShadow;
     Element.prototype.attachShadow = function() {
         const sr = origAttachShadow.apply(this, arguments);
-        try { observer.observe(sr, obsOpts); } catch(e) {}
+        try { registerRoot(sr); } catch(e) {}
         return sr;
     };
 
     // 强力多阶段触发绑定
+    initFunSpinnerEngine();
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', startEngine);
     } else {
@@ -953,8 +1158,8 @@ function install20(resourcesDir) {
         
         const targetText = '<div class="text">Loading Antigravity</div>';
         const replacementText = USE_TW
-            ? '<div class="text">反重力引擎已啟動，正在努力擺脫地心引力...</div>'
-            : '<div class="text">反重力引擎已启动，正在努力摆脱地心引力...</div>';
+            ? '<div class="text">🛸 反重力引擎已啟動，正在努力擺脫地心引力...</div>'
+            : '<div class="text">🛸 反重力引擎已启动，正在努力摆脱地心引力...</div>';
         
         loadingContent = loadingContent.replace(targetText, replacementText);
         

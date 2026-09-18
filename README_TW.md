@@ -123,10 +123,10 @@ node localization_engine.js --tw --brand-title translated
 1. **自動釋放鎖**：指令碼執行前會自動偵測並安全關閉 Antigravity 執行進程，防止檔案佔用鎖定。
 2. **安全備份**：首次執行時，會在軟體目錄自動建立原始 `app.asar.bak` 檔案，確保隨時可無損還原。
 3. **精準注入**：
-   - 注入 `preload.js`：採用 WeakSet 記錄與 Shadow DOM 穿透，啟動高效的 `MutationObserver` 引擎，動態監測並將渲染層文字翻譯為繁體中文。
+   - 注入 `preload.js`：採用 WeakSet 記錄與 Shadow DOM 穿透，啟動高效的 `MutationObserver` 引擎，動態監測並將渲染層文字翻譯為繁體中文；同時內建 **199+ 個反重力科幻特調與趣味動詞詞庫（全量配對生動 Emoji）**，並在智能體思考 (Thinking)、規劃 (Planning) 與執行過程中注入絲滑的向上浮現微動效 (`@keyframes antigravitySpinnerSlideUp`)。
    - 注入 `menu.js`：深度補丁系統級標題列選單。
    - 注入 `tray.js`：中文化系統匣與右鍵通知狀態選單。
-   - 注入 `loadingOverlay.js`：注入極具極客風格的趣味載入語：「反重力引擎已啟動，正在努力擺脫地心引力...」。
+   - 注入 `loadingOverlay.js`：注入極具極客風格的趣味載入語：「🛸 反重力引擎已啟動，正在努力擺脫地心引力...」。
 
 ---
 
